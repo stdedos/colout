@@ -14,9 +14,9 @@ if sys.argv[-1] == 'publish':
 
 packages = ['colout']
 
-setup_requires = ['setuptools_scm']
+requires = ['pygments', 'babel']
 
-requires = ['pygments', 'babel'].extend(setup_requires)
+setup_requires = ['setuptools_scm']
 
 classifiers = """
 Environment :: Console
