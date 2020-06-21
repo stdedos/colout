@@ -34,6 +34,8 @@ signal.signal( signal.SIGPIPE, signal.SIG_DFL )
 context = {}
 debug = False
 
+CASE_INSENSITIVE = False
+
 # Available styles
 context["styles"] = {
     "normal": 0, "bold": 1, "faint": 2, "italic": 3, "underline": 4,
@@ -669,12 +671,15 @@ def colorup(text, pattern, color="red", style="normal", on_groups=False, sep_lis
     '\x1b[1;34mF\x1b[0m\x1b[3;34maites\x1b[0m \x1b[1;34mC\x1b[0m\x1b[3;34mhier\x1b[0m la Vache'
     """
     global context
-    global debug
 
-    if not debug:
-        regex = re.compile(pattern)
-    else:
-        regex = re.compile(pattern, re.DEBUG)
+    re_compile_args = []
+
+    if debug:
+        re_compile_args.append(re.DEBUG)
+    if CASE_INSENSITIVE:
+        re_compile_args.append(re.IGNORECASE)
+
+    regex = re.compile(pattern, *re_compile_args)
 
     # Prepare the colored text.
     colored_text = ""
@@ -811,6 +816,9 @@ def _args_parse(argv, usage=""):
     parser.add_argument("pattern", metavar="REGEX", type=str, nargs=1,
             help="A regular expression")
 
+    parser.add_argument("-i", "--case-insensitive", action="store_true",
+                        help="Match RegEx as case-insensitive pattern.")
+
     pygments_warn=" You can use a language name to activate syntax coloring (see `-r all` for a list)."
 
     parser.add_argument("color", metavar="COLOR", type=str, nargs='?',
@@ -881,6 +889,9 @@ def _args_parse(argv, usage=""):
             help="Debug mode: print what's going on internally, useful if you want to check what features are available.")
 
     args = parser.parse_args()
+
+    global CASE_INSENSITIVE
+    CASE_INSENSITIVE = args.case_insensitive
 
     return args.pattern[0], args.color, args.style, args.groups, \
            args.colormap, args.theme, args.source, args.all, args.scale, args.debug, args.resources, args.palettes_dir, \
